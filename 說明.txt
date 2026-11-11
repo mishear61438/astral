@@ -1,0 +1,10 @@
+Astral 呼吸器簡易操作 APP（離線版 PWA）
+
+用途：放到 HTTPS 網站後，手機開啟即可「加到主畫面」，第一次開啟後可離線使用。
+
+上架方式（擇一）：
+1. 院內資訊室：把本資料夾全部檔案放到院內 HTTPS 網頁伺服器的同一個資料夾。
+2. GitHub Pages（免費）：建立 repository → 上傳本資料夾所有檔案 → Settings → Pages → 選 main branch → 取得網址。
+
+注意：service worker 只能在 https 網址運作；直接用手機開本機檔案無法離線安裝。
+更新內容後，把 sw.js 第一行的 astral-v1 改成 astral-v2，手機下次連網開啟就會更新。
