@@ -1,5 +1,7 @@
-const C='v600-v7';
-const F=['./','./index.html','./manifest.json','./icon-180.png','./icon-192.png','./icon-512.png'];
-self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(F)));self.skipWaiting();});
-self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x)))));self.clients.claim();});
-self.addEventListener('fetch',e=>{e.respondWith(fetch(e.request).then(r=>{const cp=r.clone();caches.open(C).then(c=>c.put(e.request,cp));return r;}).catch(()=>caches.match(e.request,{ignoreSearch:true})));});
+// 已搬家：清除舊快取並解除註冊
+self.addEventListener('install',()=>self.skipWaiting());
+self.addEventListener('activate',e=>{e.waitUntil((async()=>{
+  for(const k of await caches.keys()) await caches.delete(k);
+  await self.registration.unregister();
+  for(const c of await self.clients.matchAll({type:'window'})) c.navigate('https://mishear61438.github.io/V600/');
+})());});
