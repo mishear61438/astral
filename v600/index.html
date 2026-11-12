@@ -86,6 +86,9 @@ nav.bot a.em{color:var(--red)}
 .al-item .lb{font-size:13px;font-weight:700;color:var(--pri);margin-top:6px}
 .al-item ul{margin:2px 0 0;padding-left:22px}
 .tag.h3{background:var(--red);color:#fff;margin:0 4px 0 0}.tag.h2{background:#f9a825;color:#000;margin:0 4px 0 0}.tag.h1{background:#26a69a;color:#fff;margin:0 4px 0 0}
+.role{display:flex;gap:14px;align-items:center;background:#fff;border:2px solid var(--pri);border-radius:16px;padding:18px 16px;margin-bottom:14px;text-decoration:none;color:var(--ink)}
+.role b{display:block;font-size:22px;color:var(--pri)}.role small{display:block;color:var(--sub);font-size:14px;line-height:1.4}
+.role .ri{font-size:44px}.role.rt{border-color:#2e7d32}.role.rt b{color:#2e7d32}
 </style>
 </head>
 <body>
@@ -95,9 +98,9 @@ nav.bot a.em{color:var(--red)}
 </header>
 <main id="app"></main>
 <nav class="bot">
-  <a href="#home" data-nav="home"><span>🏠</span>首頁</a>
+  <a href="#home" data-nav="home" id="navhome"><span>🏠</span>首頁</a>
   <a href="#alarms" data-nav="alarms"><span>🔔</span>警報查詢</a>
-  <a href="#quick" data-nav="quick" class="em"><span>🚨</span>快速啟動</a>
+  <a href="#emergency" data-nav="emergency" class="em"><span>🚨</span>緊急</a>
 </nav>
 <div id="zoom"><button class="x">✕ 關閉</button><img alt=""></div>
 <script>
@@ -107,12 +110,38 @@ const WARN = `<div class="warn"><div>⚠ 機器使用時一定要插電、接好
 const k = s => `<b class="k">${s}</b>`;
 
 const P = {};
-const SEC = ['intro','screen','poweron','start','quick','mode','stop','alarm','o2'];
+
+const NURSE = ['intro','screen','alarm','o2n','emergency'];
+const RT = ['intro','screen','poweron','start','quick','mode','stop','alarm','o2'];
+let ROLE = null; try{ROLE=localStorage.getItem('v600role');}catch(e){}
+const setRole = r => { ROLE=r; try{localStorage.setItem('v600role',r);}catch(e){} };
 
 P['home'] = {t:'V600 呼吸器簡易操作', h:()=>`
-${WARN}
 <div class="install card" id="inst"><b>📲 加到主畫面</b><div id="instTxt" style="font-size:15px"></div></div>
-<div class="grp">院內版｜Dräger Evita V600 簡易操作手冊</div>
+<p style="font-size:18px;font-weight:700;margin:6px 2px 12px">請選擇使用者：</p>
+<a class="role" href="#nurse"><span class="ri">👩‍⚕️</span><span><b>護理師</b><small>認識機器、看螢幕與警報、O₂ therapy 照護、緊急處置</small></span></a>
+<a class="role rt" href="#rt"><span class="ri">🫁</span><span><b>呼吸治療師 RT</b><small>開機、開始治療、改模式／調參數、O₂ therapy 設定、內部設定</small></span></a>
+<p class="src">內容依據：大里呼吸治療科《V600 簡易操作手冊》、Dräger Evita V800/V600 Instructions for use。<br>本 APP 為操作提示，不取代醫囑與原廠使用手冊。有疑問請聯絡 on call 值班 RT（GSM：12706）。</p>
+`};
+
+P['nurse'] = {t:'護理師專區', h:()=>`
+<div class="warn"><div><span>⚠ 機器使用時一定要插電、接好氣源！</span></div><div><span>⚠ 不可自行更改模式或參數，須由「值班醫師」或「RT」處理</span></div></div>
+<div class="grid">
+  <a class="tile" href="#intro"><span><span class="n">1</span>認識機器</span><small>各元件、螢幕、通氣元件</small></a>
+  <a class="tile" href="#screen"><span><span class="n">2</span>螢幕怎麼看</span><small>主螢幕、數值、警報顏色</small></a>
+  <a class="tile al" href="#alarm"><span><span class="n">3</span>警報怎麼看</span><small>燈號、靜音</small></a>
+  <a class="tile" href="#o2n"><span><span class="n">4</span>O₂ therapy 照護</span><small>觀察重點、常見警報</small></a>
+  <a class="tile em" href="#emergency"><span><span class="n">5</span>緊急狀況</span><small>機器故障、病人惡化</small></a>
+  <a class="tile al" href="#alarms">警報處理查詢<small>可搜尋警報訊息</small></a>
+</div>
+<p class="src">內容依據：大里呼吸治療科《V600 簡易操作手冊》、Dräger Evita V800/V600 Instructions for use。<br>本 APP 為操作提示，不取代醫囑與原廠使用手冊。有疑問請聯絡 on call 值班 RT（GSM：12706）。</p>
+`, after:()=>setRole('nurse')};
+
+P['rt'] = {t:'RT 專區', h:()=>`
+<div class="warn"><div><span>⚠ 機器使用時一定要插電、接好氣源！</span></div></div>
+<div class="card" style="border:2px solid var(--amb)"><h2>🔑 內部設定密碼（RT 使用）</h2>
+<p class="big" style="letter-spacing:.08em">12101210</p>
+<p style="font-size:15px;color:var(--sub)">機台下方貼紙同一組密碼。進入內部設定僅限 RT 操作。</p></div>
 <div class="grid">
   <a class="tile" href="#intro"><span><span class="n">1</span>產品介紹</span><small>各元件、螢幕、通氣元件</small></a>
   <a class="tile" href="#screen"><span><span class="n">2</span>螢幕與旋鈕</span><small>主螢幕、顏色、輕觸-旋轉-確認</small></a>
@@ -125,10 +154,51 @@ ${WARN}
   <a class="tile" href="#o2"><span><span class="n">9</span>O₂ therapy</span><small>高流量氧氣、單管接法</small></a>
   <a class="tile al" href="#alarms">警報處理查詢<small>故障排除指引，可搜尋</small></a>
 </div>
-<p class="src">內容依據：大里呼吸治療科《V600 簡易操作手冊》（Dräger Evita V600）。<br>本 APP 為操作提示，不取代醫囑與原廠使用手冊（Evita V800/V600 Instructions for use）。有疑問請聯絡 on call 值班 RT（GSM：12706）。</p>
+<p class="src">內容依據：大里呼吸治療科《V600 簡易操作手冊》、Dräger Evita V800/V600 Instructions for use。<br>本 APP 為操作提示，不取代醫囑與原廠使用手冊。有疑問請聯絡 on call 值班 RT（GSM：12706）。</p>
+`, after:()=>setRole('rt')};
+
+P['o2n'] = {t:'O₂ therapy 照護重點', h:()=>`
+<div class="warn"><div><span>⚠ O₂ therapy 時呼吸器只監測 FiO₂、流量、壓力；VT、MVe、RR、Paw、Apnea 警報全部不作用</span></div><div><span>⚠ 一定要接外接監測（SpO₂），並定時評估病人</span></div></div>
+<div class="card"><h2>怎麼知道在做 O₂ therapy？</h2>${fig('o2_screen')}
+<p>螢幕左上治療類型顯示 <b>O2 therapy</b>；下方設定鈕只有 <b>FiO₂、Const Flow、Pmax</b>。</p></div>
+<div class="card"><h2>觀察重點</h2>
+<ol class="steps">
+<li>SpO₂、呼吸型態、病人意識；惡化時先 call 值班醫師並通知 RT</li>
+<li>管路接法是<b>單管</b>：機器<b>吐氣口是開放的</b>，屬正常，<b>不要堵住</b>${fig('o2_single')}</li>
+<li>管路不可扭折、壓到；鼻導管／面罩不可阻塞</li>
+<li>鼻導管<b>不可塞滿鼻孔</b>（需保留漏氣），注意鼻部、臉部皮膚壓傷</li>
+<li>加濕器要有水、正常加溫</li>
+<li>不可改用 NIV 面罩（沒有漏氣孔）</li>
+</ol></div>
+<div class="card"><h2>常見警報</h2>
+<table><tr><th>警報</th><th>先檢查</th></tr>
+<tr><td><b>Breathing hose kinked</b></td><td>管路是否扭折、鼻導管／面罩是否阻塞</td></tr>
+<tr><td><b>Flow low</b></td><td>管路、鼻導管是否阻塞或脫落；仍響通知 RT</td></tr>
+<tr><td><b>FiO2 low</b></td><td>通知 RT（氣源或流量設定問題）</td></tr></table>
+<div class="note">FiO₂、流量、Pmax 由醫師／RT 調整，護理師不可自行更改。</div></div>
 `};
 
-P['intro'] = {t:'1. 產品介紹', h:()=>`
+P['emergency'] = {t:'緊急狀況', h:()=>`
+<div class="card" style="border:2px solid var(--red)"><h2 style="color:var(--red)">🚨 機器故障／無法通氣</h2>
+<p style="font-size:15px;color:var(--sub)">例：Device failure、Calibration of gas delivery system required、紅燈持續、螢幕當機</p>
+<ol class="steps">
+<li><b>立即</b>將病人與呼吸器分離，用 <b>Ambu</b> 給予通氣（接氧氣）</li>
+<li>通知值班 <b>RT（GSM 12706）</b>準備換機</li>
+<li>病人狀況不穩，同時 call 值班醫師</li>
+</ol></div>
+<div class="card"><h2>病人惡化（SpO₂ 下降、呼吸窘迫）</h2>
+<ol class="steps">
+<li>先看病人：管路有無脫落、扭折，痰多需抽痰</li>
+<li>call 值班醫師，並通知 RT</li>
+<li>無法維持時改用 Ambu 給予通氣</li>
+</ol></div>
+<div class="card"><h2>停電／電池供電</h2>
+<p><b>Battery activated</b>（電池供電中）、<b>Battery low</b>（剩 &lt;10 分鐘）：立即把插頭接回主電源，並通知 RT。</p></div>
+<div class="card"><h2>紅燈警報</h2><p><span class="dot blink" style="background:var(--red)"></span><b>立即到床邊</b>，查看警報訊息，可到「警報查詢」搜尋處理方式。</p>
+<a class="tile al" href="#alarms" style="min-height:56px">🔔 警報處理查詢 ›</a></div>
+`};
+
+P['intro'] = {t:'產品介紹', h:()=>`
 <div class="card"><h2>V600 加護型呼吸器</h2>${fig('device')}
 <table><tr><th>元件</th><th>說明</th></tr>
 <tr><td>顯示螢幕</td><td>觸控螢幕＋飛梭旋鈕</td></tr>
@@ -142,7 +212,7 @@ P['intro'] = {t:'1. 產品介紹', h:()=>`
 <p>吸氣閥、吐氣閥、流量感應器、緊急進氣閥、集水杯、噴霧接孔、通氣操作顯示燈。</p></div>
 `};
 
-P['screen'] = {t:'2. 螢幕與旋鈕', h:()=>`
+P['screen'] = {t:'螢幕與旋鈕', h:()=>`
 <div class="card"><h2>主螢幕（實機畫面）</h2>${fig('main_photo')}
 <table><tr><th>#</th><th>位置</th></tr>
 <tr><td>1</td><td>患者類別、通氣模式（如 VC-SIMV）、治療類型（Tube／NIV）</td></tr>
@@ -152,9 +222,6 @@ P['screen'] = {t:'2. 螢幕與旋鈕', h:()=>`
 <tr><td>5</td><td>監測數值：PIP、Pmean、MVe、RR、VTe、I:E、PEEP</td></tr>
 <tr><td>6</td><td>通氣參數設定鈕：FiO₂、VT、Ti、RR、PEEP、ΔPsupp…（輕觸→旋轉→確認）</td></tr>
 <tr><td>7</td><td>通氣模式標籤（VC-AC、PC-AC、SPN-CPAP/PS…），右側 Other modes＝其他模式</td></tr></table></div>
-<div class="card" style="border:2px solid var(--amb)"><h2>🔑 內部設定密碼（RT 使用）</h2>
-<p class="big" style="letter-spacing:.08em">12101210</p>
-<p style="font-size:15px;color:var(--sub)">機台下方貼紙同一組密碼。進入內部設定僅限 RT 操作。</p></div>
 <div class="card"><h2>主螢幕說明圖</h2>${fig('main')}
 <p>• 左上：<b>患者類別</b>、<b>通氣模式／治療類型</b><br>• 上方：<b>電源供應／電池充電狀態</b>、<b>警報訊息</b><br>• 右側快捷鈕可開啟：警報欄、視窗訊息、趨勢／數據訊息、感應器數據、處理程序訊息、系統設置訊息<br>• 左下：<b>其他通氣模式選擇鈕</b><br>• 右下：<b>開始／關閉通氣</b>、<b>開始／關閉氧氣治療</b></p></div>
 <div class="card"><h2>警報顏色</h2>
@@ -175,7 +242,7 @@ ${fig('colors')}</div>
 <div class="note">所有設定都要<b>按下旋鈕確認</b>才會生效。</div></div>
 `};
 
-P['poweron'] = {t:'3. 開機', h:()=>`
+P['poweron'] = {t:'開機', h:()=>`
 ${WARN}
 <div class="card"><h2>開啟設備</h2>
 <ol class="steps">
@@ -188,7 +255,7 @@ ${WARN}
 </ol>${fig('start_dlg')}</div>
 `};
 
-P['start'] = {t:'4. 開始治療', h:()=>`
+P['start'] = {t:'開始治療', h:()=>`
 ${WARN}
 <div class="card"><h2>A. 依「患者身高」（新的成人／兒童患者）</h2>${fig('start_height')}
 <ol class="steps">
@@ -211,7 +278,7 @@ ${WARN}
 </ol></div>
 `};
 
-P['quick'] = {t:'5. 快速啟動通氣', h:()=>`
+P['quick'] = {t:'快速啟動通氣', h:()=>`
 <div class="note"><b>適用時機：</b>緊急情況，可立即開始治療，<b>不需檢查操作準備狀況</b>。</div>
 <div class="card">
 <ol class="steps">
@@ -221,7 +288,7 @@ P['quick'] = {t:'5. 快速啟動通氣', h:()=>`
 <div class="note">開始後請儘快通知值班 RT 確認設定（GSM 12706）。</div></div>
 `};
 
-P['mode'] = {t:'6. 改通氣模式／調參數', h:()=>`
+P['mode'] = {t:'改通氣模式／調參數', h:()=>`
 <div class="warn"><div>⚠ 須先經「值班醫師」或「RT」同意後，才可更改模式或參數</div></div>
 <div class="card"><h2>更改通氣模式</h2>
 <ol class="steps">
@@ -236,7 +303,7 @@ P['mode'] = {t:'6. 改通氣模式／調參數', h:()=>`
 </ol>${fig('set')}</div>
 `};
 
-P['stop'] = {t:'7. 中斷治療', h:()=>`
+P['stop'] = {t:'中斷治療', h:()=>`
 <div class="card">
 <ol class="steps">
 <li>在治療欄輕觸 ${k('停止通氣')} → 跳出一個視窗</li>
@@ -249,7 +316,7 @@ P['stop'] = {t:'7. 中斷治療', h:()=>`
 <div class="warn"><div>⚠ 預備模式（Standby）下<b>呼吸器不會給病人通氣</b>，確認病人已脫離呼吸器或已接上其他支持。</div></div></div>
 `};
 
-P['alarm'] = {t:'8. 警報怎麼看', h:()=>`
+P['alarm'] = {t:'警報怎麼看', h:()=>`
 <div class="card"><h2>警報訊號燈</h2>${fig('al_light')}
 <p>螢幕上方有<b>警報燈</b>與<b>警報訊息區</b>，點「更多警報」可展開；觸發警報的參數會閃爍。</p>
 <table><tr><th>燈色</th><th>等級</th><th>處理</th></tr>
@@ -269,7 +336,7 @@ P['alarm'] = {t:'8. 警報怎麼看', h:()=>`
 `};
 
 
-P['o2'] = {t:'9. O₂ therapy（高流量氧氣治療）', h:()=>`
+P['o2'] = {t:'O₂ therapy（高流量氧氣治療）', h:()=>`
 <div class="warn"><div><span>⚠ O₂ therapy 時呼吸器只監測 FiO₂、流量、壓力；VT、MVe、RR、Paw、Apnea 警報全部不作用</span></div><div><span>⚠ 一定要接外接監測（SpO₂），並定時評估病人</span></div></div>
 <div class="note"><b>適用：</b>有自發呼吸的病人（成人／兒童／新生兒），給予加溫加濕、固定流量與氧濃度的氣體。<br><b>禁用：</b>沒有自發呼吸或呼吸不規則、呼吸道部分或完全阻塞、無法耐受鼻導管／面罩。</div>
 <div class="card"><h2>A. 管路接法（單管，移除吐氣端）</h2>${fig('o2_single')}
@@ -283,7 +350,7 @@ P['o2'] = {t:'9. O₂ therapy（高流量氧氣治療）', h:()=>`
 <div class="note">鼻導管大小：管腳<b>不可塞滿鼻孔</b>，需保留約 50% 漏氣，否則鼻腔壓力會升高。</div></div>
 <div class="card"><h2>B. 開始 O₂ therapy</h2>
 <ol class="steps">
-<li>開機（見「3. 開機」）</li>
+<li>開機（見「開機」）</li>
 <li>開啟 <b>O₂ 監測</b></li>
 <li>治療類型選 ${k('O2 治療')} → 旋鈕確認</li>
 <li>設定 ${k('FiO2')}、${k('Const Flow')}、${k('Pmax')}（輕觸 → 旋轉 → 確認）</li>
@@ -312,7 +379,7 @@ P['o2'] = {t:'9. O₂ therapy（高流量氧氣治療）', h:()=>`
 <tr><td><b>!!! Flow low</b>（送出 ≤50% 設定流量）<br><b>!! Flow low</b>（50–90%）</td><td>檢查管路與鼻導管；調高 Pmax 或調降 Const Flow（須經醫師／RT 同意）</td></tr>
 <tr><td><b>!!! FiO2 low</b>（使用 GS500 且 FiO₂ >95%）</td><td>Const Flow 至少 5 L/min，或改接中央供氣 Air</td></tr></table></div>
 <div class="card"><h2>停止 O₂ therapy</h2>
-<p>• 改選其他治療類型（Tube／NIV），或<br>• 依「7. 中斷治療」停止治療</p></div>
+<p>• 改選其他治療類型（Tube／NIV），或<br>• 依「中斷治療」停止治療</p></div>
 <p class="src">依據：Dräger Evita V800/V600 Instructions for use SW 2.n，7.3、7.15 節。</p>
 `};
 /* 故障排除指引：p=優先序 3/2/1；c=原因；s=處理 */
@@ -375,7 +442,7 @@ P['alarms'] = {t:'警報處理查詢', h:()=>`
 
 /* ---------- 路由 ---------- */
 function pager(id){
-  for(const L of [SEC]){const i=L.indexOf(id); if(i<0) continue;
+  for(const L of [ROLE==='nurse'?NURSE:RT]){const i=L.indexOf(id); if(i<0) continue;
     const p=L[i-1], n=L[i+1];
     return `<div class="pager">${p?`<a href="#${p}">‹ ${P[p].t}</a>`:'<span style="flex:1"></span>'}${n?`<a class="nx" href="#${n}">${P[n].t} ›</a>`:'<span style="flex:1"></span>'}</div>`;}
   return '';
@@ -388,10 +455,12 @@ function render(){
   document.getElementById('app').innerHTML = pg.h() + pager(id);
   document.querySelectorAll('nav.bot a').forEach(a=>a.classList.toggle('on',a.dataset.nav===id));
   pg.after && pg.after();
+  const nh=document.getElementById('navhome'); nh.href = (ROLE&&id!=='home')?'#'+ROLE:'#home';
+  nh.classList.toggle('on', id==='home'||id===ROLE);
   if(id==='home') showInstall();
   window.scrollTo(0,0);
 }
-document.getElementById('back').onclick=()=>{ location.hash='home'; };
+document.getElementById('back').onclick=()=>{ const h=(location.hash||'').slice(1); location.hash = (h==='nurse'||h==='rt'||!ROLE)?'home':ROLE; };
 window.addEventListener('hashchange',render);
 
 /* 圖片放大 */
